@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Text, HelperText, Avatar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,7 +16,12 @@ export const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-
+  const { user, signInWithGoogle, signInWithFacebook } = useAuth() as unknown as {
+    user: any;
+    signInWithGoogle: () => void;
+    signInWithFacebook: () => void;
+  };
+  
   const handleLogin = async () => {
     if (!email || !password) {
       setError('Please fill in all fields');
@@ -130,6 +135,21 @@ export const LoginScreen = () => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+      >
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      {user ? (
+        <Text>Welcome, {user.displayName}</Text>
+      ) : (
+        <>
+          <Button mode="contained" onPress={signInWithGoogle}>
+            Sign in with Google
+          </Button>
+          <Button mode="contained" onPress={signInWithFacebook}>
+            Sign in with Facebook
+          </Button>
+        </>
+      )}
+    </View>
   );
 };
 

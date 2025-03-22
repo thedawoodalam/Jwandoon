@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1066985197667",
+    "project_id": "jwandoon-1731f",
+    "storage_bucket": "jwandoon-1731f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066985197667:android:3b687af6e58bf0f64ba856",
+        "android_client_info": {
+          "package_name": "com.jwandoon"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1066985197667-4vjto093c2p2h2gn37ab4795t0gmhp6u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMlbTGnKT-OpaZRLA-KMnhJdkuWto6m8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1066985197667-4vjto093c2p2h2gn37ab4795t0gmhp6u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

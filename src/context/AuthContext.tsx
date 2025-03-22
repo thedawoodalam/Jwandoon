@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Mock user data
 const MOCK_USER = {
   uid: 'test-user-id',
   email: 'test@jwandoon.com',
+  displayName: 'Test User',
 };
 
 const MOCK_USER_PROFILE = {
@@ -21,6 +22,7 @@ const MOCK_USER_PROFILE = {
 };
 
 type User = {
+  displayName: ReactNode;
   uid: string;
   email: string;
 } | null;

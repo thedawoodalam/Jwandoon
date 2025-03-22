@@ -22,6 +22,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
+  Main: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   CreateRequest: undefined;
   RequestDetails: { requestId: string; userId: string };

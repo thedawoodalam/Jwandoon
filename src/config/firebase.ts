@@ -17,7 +17,7 @@ const firebaseConfig = {
 };
 
 let app: any;
-let auth: any;
+export let auth: any;
 export let db: any;
 let storage: any;
 

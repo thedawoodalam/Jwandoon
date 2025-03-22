@@ -37,4 +37,9 @@
       "googleClientId": "1066985197667-4vjto093c2p2h2gn37ab4795t0gmhp6u.apps.googleusercontent.com"
     }
   }
+,
+  "extra": {
+  "googleMapsApiKey": "AIzaSyBIgOc_VVE-8tnoR7EBD-TEFMlqS5CLtOY"
+}
+
 }

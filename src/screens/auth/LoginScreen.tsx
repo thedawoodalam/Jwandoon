@@ -1,209 +1,67 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
-import { TextInput, Button, Text, HelperText, Avatar } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigation/types';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState } from "react";
+import { View, Button, Text, TextInput, StyleSheet, Alert } from "react-native";
+import { useAuth } from "../../context/authContext";
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+export default function LoginScreen() {
+  const { user, loginWithEmail, loginWithGoogle, loginWithFacebook } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-export const LoginScreen = () => {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { user, signInWithGoogle, signInWithFacebook } = useAuth() as unknown as {
-    user: any;
-    signInWithGoogle: () => void;
-    signInWithFacebook: () => void;
-  };
-  
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
+  const handleEmailLogin = async () => {
     try {
-      setLoading(true);
-      setError('');
-      await signIn(email, password);
-      navigation.replace('Main');
+      await loginWithEmail(email, password);
+      Alert.alert("Success", "Logged in successfully!");
     } catch (error: any) {
-      setError(error.message || 'Invalid email or password');
-      console.error('Login error:', error);
-    } finally {
-      setLoading(false);
+      Alert.alert("Login Error", error.message);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.logoContainer}>
-          <Avatar.Icon 
-            size={120} 
-            icon="heart" 
-            color="#fff"
-            style={{ backgroundColor: '#E53935' }}
-          />
-          <Text variant="headlineMedium" style={styles.title}>
-            Welcome Back
-          </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
-            Sign in to continue
-          </Text>
-        </View>
-
-        <View style={styles.formContainer}>
-          <TextInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
-            mode="outlined"
-          />
-
-          <TextInput
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={secureTextEntry}
-            right={
-              <TextInput.Icon
-                icon={secureTextEntry ? 'eye-off' : 'eye'}
-                onPress={() => setSecureTextEntry(!secureTextEntry)}
-              />
-            }
-            style={styles.input}
-            mode="outlined"
-          />
-
-          <HelperText type="error" visible={!!error}>
-            {error}
-          </HelperText>
-
-          <Button
-            mode="contained"
-            onPress={handleLogin}
-            loading={loading}
-            disabled={loading}
-            style={styles.button}
-            contentStyle={styles.buttonContent}
-          >
-            Login
-          </Button>
-
-          <Button
-            mode="outlined"
-            onPress={() => {
-              setEmail('test@jwandoon.com');
-              setPassword('Test123!');
-            }}
-            style={[styles.button, styles.testButton]}
-          >
-            Fill Test Account
-          </Button>
-
-          <View style={styles.footer}>
-            <Text variant="bodyMedium">Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text variant="bodyMedium" style={styles.link}>Register</Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('ForgotPassword')}
-            style={styles.forgotPassword}
-          >
-            <Text variant="bodyMedium" style={styles.forgotPasswordText}>
-              Forgot Password?
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-      >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <View style={styles.container}>
       {user ? (
-        <Text>Welcome, {user.displayName}</Text>
+        <Text style={styles.welcomeText}>Welcome, {user.displayName || user.email}</Text>
       ) : (
         <>
-          <Button mode="contained" onPress={signInWithGoogle}>
-            Sign in with Google
-          </Button>
-          <Button mode="contained" onPress={signInWithFacebook}>
-            Sign in with Facebook
-          </Button>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+          />
+          <Button title="Login with Email" onPress={handleEmailLogin} />
+          <Button title="Login with Google" onPress={loginWithGoogle} />
+          <Button title="Login with Facebook" onPress={loginWithFacebook} />
         </>
       )}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  title: {
-    marginBottom: 10,
-    color: '#E53935',
-  },
-  subtitle: {
-    color: '#757575',
-  },
-  formContainer: {
-    width: '100%',
-  },
   input: {
-    marginBottom: 16,
+    width: "80%",
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingLeft: 8,
   },
-  button: {
-    marginTop: 8,
-    marginBottom: 16,
+  welcomeText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
-  buttonContent: {
-    height: 48,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 16,
-  },
-  link: {
-    color: '#E53935',
-  },
-  forgotPassword: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  forgotPasswordText: {
-    color: '#E53935',
-  },
-  testButton: {
-    marginTop: 8,
-    marginBottom: 16,
-  },
-}); 
+});

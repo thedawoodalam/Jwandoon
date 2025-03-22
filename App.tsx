@@ -1,33 +1,42 @@
-import React, { useEffect } from 'react';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { PaperProvider, MD3LightTheme as DefaultTheme } from 'react-native-paper';
-import { AuthProvider } from './src/context/AuthContext';
-import { initializeFirebase } from './src/config/firebase';
-import { AppNavigator } from './src/navigation/AppNavigator';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { AuthProvider, useAuth } from "./src/context/authContext";
+import LoginScreen from "./src/screens/auth/LoginScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import { ActivityIndicator, View } from "react-native";
 
-const theme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: '#E53935',
-    secondary: '#757575',
-  },
-};
+const Stack = createStackNavigator();
 
-function App(): React.JSX.Element {
-  useEffect(() => {
-    initializeFirebase();
-  }, []);
+// Protected Screen Wrapper
+function ProtectedRoutes() {
+  const { user } = useAuth();
+
+  if (user === undefined) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
-    <AuthProvider>
-      <SafeAreaProvider>
-        <PaperProvider theme={theme}>
-          <AppNavigator />
-        </PaperProvider>
-      </SafeAreaProvider>
-    </AuthProvider>
+    <Stack.Navigator>
+      {user ? (
+        <Stack.Screen name="Home" component={HomeScreen} />
+      ) : (
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+      )}
+    </Stack.Navigator>
   );
 }
 
-export default App; 
+export default function App() {
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <ProtectedRoutes />
+      </NavigationContainer>
+    </AuthProvider>
+  );
+}

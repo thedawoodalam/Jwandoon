@@ -1,147 +1,97 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { auth, db } from "../config/firebase";
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  FacebookAuthProvider, 
+  signInWithPopup, 
+  onAuthStateChanged, 
+  User 
+} from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
-// Mock user data
-const MOCK_USER = {
-  uid: 'test-user-id',
-  email: 'test@jwandoon.com',
-  displayName: 'Test User',
-};
+const AuthContext = createContext<any>(null);
 
-const MOCK_USER_PROFILE = {
-  id: 'test-user-id',
-  name: 'Test User',
-  email: 'test@jwandoon.com',
-  phoneNumber: '+1234567890',
-  bloodType: 'O+',
-  address: '123 Test St, Test City',
-  emergencyContact: '+1987654321',
-  bio: 'Regular blood donor',
-  lastDonationDate: '2024-01-15',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-};
-
-type User = {
-  displayName: ReactNode;
-  uid: string;
-  email: string;
-} | null;
-
-type UserProfile = {
-  id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  bloodType: string;
-  address?: string;
-  emergencyContact?: string;
-  bio?: string;
-  lastDonationDate?: string;
-  createdAt: string;
-  updatedAt: string;
-} | null;
-
-type AuthContextType = {
-  user: User;
-  userProfile: UserProfile;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile>(null);
-  const [loading, setLoading] = useState(true);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Simulate initial auth state check
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userSnapshot = await getDoc(userDocRef);
 
-    return () => clearTimeout(timer);
+        if (!userSnapshot.exists()) {
+          // If the user does not exist in Firestore, create the entry
+          await setDoc(userDocRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            createdAt: new Date(),
+          });
+        }
+      }
+      setUser(user);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      // Mock successful sign in
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser(MOCK_USER);
-      setUserProfile(MOCK_USER_PROFILE);
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  // Sign Up with Email & Password (and save user to Firestore)
+  const signUpWithEmail = async (email: string, password: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || "",
+      photoURL: user.photoURL || "",
+      createdAt: new Date(),
+    });
   };
 
-  const signUp = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      // Mock successful sign up
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser(MOCK_USER);
-      setUserProfile(MOCK_USER_PROFILE);
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  // Login with Email & Password
+  const loginWithEmail = async (email: string, password: string) => {
+    return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signOut = async () => {
-    try {
-      setLoading(true);
-      // Mock successful sign out
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setUser(null);
-      setUserProfile(null);
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  // Google Login (Save user to Firestore)
+  const loginWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || "",
+      photoURL: user.photoURL || "",
+      createdAt: new Date(),
+    }, { merge: true });
   };
 
-  const resetPassword = async (email: string) => {
-    try {
-      setLoading(true);
-      // Mock password reset email
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  // Facebook Login (Save user to Firestore)
+  const loginWithFacebook = async () => {
+    const provider = new FacebookAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || "",
+      photoURL: user.photoURL || "",
+      createdAt: new Date(),
+    }, { merge: true });
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        userProfile,
-        loading,
-        signIn,
-        signUp,
-        signOut,
-        resetPassword,
-      }}
-    >
+    <AuthContext.Provider value={{ user, signUpWithEmail, loginWithEmail, loginWithGoogle, loginWithFacebook }}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}; 
+export function useAuth() {
+  return useContext(AuthContext);
+}

@@ -3,24 +3,17 @@ import { View, FlatList, Alert, StyleSheet } from "react-native";
 import { Text, Card, Button } from "react-native-paper";
 import { db } from "../../config/firebase";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import { map } from "zod";
 
-type Institution = {
-  id: string;
-  name: string;
-  regNumber: string;
-  contactPerson: string;
-  contactNumber: string;
-  status: string;
-};
+export default function AdminInstitutionApprovalScreen() {
+  interface Institution {
+    id: string;
+    name: string;
+    regNumber: string;
+    contactPerson: string;
+    contactNumber: string;
+    status: string;
+  }
 
-const AdminInstitutionApprovalScreen = () => {
-  const styles = StyleSheet.create({
-    container: { flex: 1, padding: 10 },
-    card: { marginBottom: 10 },
-    button: { marginTop: 5 },
-  });
-  
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +22,7 @@ const AdminInstitutionApprovalScreen = () => {
       setLoading(true);
       const querySnapshot = await getDocs(collection(db, "institutions"));
       const pendingInstitutions = querySnapshot.docs
-        .map(doc => ({ ...(doc.data() as Institution), id: doc.id }))
+        .map(doc => ({ id: doc.id, ...doc.data() } as Institution))
         .filter(item => item.status === "pending");
       setInstitutions(pendingInstitutions);
       setLoading(false);
@@ -63,12 +56,10 @@ const AdminInstitutionApprovalScreen = () => {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10 },
   card: { marginBottom: 10 },
   button: { marginTop: 5 },
 });
-
-export default AdminInstitutionApprovalScreen;

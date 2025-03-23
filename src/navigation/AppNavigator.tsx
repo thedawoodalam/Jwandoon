@@ -5,6 +5,8 @@ import { useAuth } from "../context/authContext";
 import HomeScreen from "../screens/HomeScreen";
 import { CreateRequestScreen } from "../screens/main/CreateRequestScreen";
 import LoginScreen from "../screens/auth/LoginScreen";
+import InstitutionSignupScreen from "../screens/auth/InstitutionSignupScreen";
+import AdminInstitutionApprovalScreen from "../screens/admin/AdminInstitutionApprovalScreen";
 import { ActivityIndicator, View } from "react-native";
 
 const Stack = createStackNavigator();
@@ -23,12 +25,27 @@ function AppNavigator() {
   return (
     <Stack.Navigator>
       {user ? (
-        <>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Create Request" component={CreateRequestScreen} />
-        </>
+        user.isAdmin ? (
+          <>
+            <Stack.Screen name="Admin Panel" component={AdminInstitutionApprovalScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+          </>
+        ) : user.isInstitution && user.status === "approved" ? (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Create Request" component={CreateRequestScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Institution Signup" component={InstitutionSignupScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+          </>
+        )
       ) : (
-        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Institution Signup" component={InstitutionSignupScreen} />
+        </>
       )}
     </Stack.Navigator>
   );
